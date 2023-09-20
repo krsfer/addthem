@@ -1,15 +1,92 @@
 #!/bin/zsh
 
+# Function to manage user input
+manage_input() {
+  local guess=""
+  local start_time end_time elapsed_time
+
+  # Record the start time
+  start_time=$(date +%s)
+
+  # Sanitize input
+  while true; do
+    if read -r guess; then
+      if [[ $guess == "q" || $guess =~ ^[0-9a-z[:space:]]+$ ]]; then
+        break
+      else
+        echo "Invalid input. Please enter only characters between 0-9, a-z, or space."
+      fi
+    else
+      # No input provided, handle it as an empty string
+      guess=""
+      break
+    fi
+  done
+
+  # Record the end time and calculate the elapsed time
+  end_time=$(date +%s)
+  elapsed_time=$((end_time - start_time))
+
+  echo "$guess $elapsed_time"
+}
+
+# Unit tests for manage_input
+# Unit tests for manage_input
+test_manage_input() {
+  local result
+
+  # Test 1: Check empty input
+  result=$(echo "" | manage_input)
+  expected=" 0"
+  if [[ $result == $expected ]]; then
+    echo "Test 1 passed: Expected '$expected', got '$result'"
+  else
+    echo "Test 1 failed: Expected '$expected', got '$result'"
+  fi
+
+  # Test 2: Check 'q' input
+  result=$(echo "q" | manage_input)
+  expected="q 0"
+  if [[ $result == $expected ]]; then
+    echo "Test 2 passed: Expected '$expected', got '$result'"
+  else
+    echo "Test 2 failed: Expected '$expected', got '$result'"
+  fi
+
+  # Test 3: Check valid characters
+  result=$(echo "abc123" | manage_input)
+  expected="abc123 0"
+  if [[ $result == $expected ]]; then
+    echo "Test 3 passed: Expected '$expected', got '$result'"
+  else
+    echo "Test 3 failed: Expected '$expected', got '$result'"
+  fi
+
+  # Test 4: Check invalid characters
+  result=$(echo "!" | manage_input 2>/dev/null)
+  expected="Invalid input. Please enter only characters between 0-9, a-z, or space."
+  if [[ $result == $expected ]]; then
+    echo "Test 4 passed: Expected '$expected', got '$result'"
+  else
+    echo "Test 4 failed: Expected '$expected', got '$result'"
+  fi
+}
+
+# Run the tests
+test_manage_input
+
+exit
+
 # Initialize variables
 count=0
 max=10
 total_time=0
 log_file="log.txt"
 
-# Clear the log file if it exists
+# Clear the log file
 : > $log_file
 
-# Add table header to the log file
+# Add table header to log file
 {
   echo "+------------+---------------+---------+-----------------+"
   echo "|  Question  |    Numbers    |  Guess  | Elapsed Time(s) |"
@@ -19,55 +96,38 @@ log_file="log.txt"
 while (( count < $max )); do
   echo Question $((count + 1)) / $max
 
-  # Generate a random length between 3 and 6
+  # Generate random sequence
   length=$((RANDOM % 4 + 3))
-
-  # Generate a random sequence of numbers with that length
   read -r -A nums <<< "$(jot -r $length 1 9 | tr '\n' ' ')"
 
-  # Sort the nums array in ascending order
+  # Sort the nums
   read -r -A nums <<< "$(printf "%s\n" "${nums[@]}" | sort -n | tr '\n' ' ')"
 
   echo "${nums[@]}"
 
-  # Record the start time
-  start_time=$(date +%s)
+  # Call manage_input function
+  read -r guess elapsed_time <<< "$(manage_input)"
 
-  # Sanitize input
-  while true; do
-    read -r guess
-
-    if [[ -z $guess || $guess =~ ^[0-9a-z]+$ ]]; then
-      break
-    else
-      echo "Invalid input. Please enter only characters between 0-9 or a-z."
-    fi
-  done
-
-  # Skip the current question if 's' is entered
+  # Handle special cases
   if [[ $guess == "s" ]]; then
     echo "Skipping current question."
     continue
   fi
 
   if [[ $guess == "q" || -z $guess ]]; then
+    echo "Quitting the session."
     break
   fi
 
-
-  # Record the end time and calculate the elapsed time
-  end_time=$(date +%s)
-  elapsed_time=$((end_time - start_time))
   total_time=$((total_time + elapsed_time))
 
-
-  # Calculate the sum of the numbers in the array
+  # Calculate the sum
   sum=0
   for n in "${nums[@]}"; do
     sum=$((sum + n))
   done
 
-  # Log the question and elapsed time to a file, formatted as a table row
+  # Log the question and elapsed time
   printf "| %10d | %13s | %7s | %15d |\n" $((count + 1)) "${nums[*]}" "$guess" "$elapsed_time" >> $log_file
   echo "+------------+---------------+---------+-----------------+" >> $log_file
 
@@ -80,7 +140,7 @@ while (( count < $max )); do
   count=$((count + 1))
 done
 
-# Log the total time to the file
+# Log total time
 echo "Total time for the session: $total_time sec" >> $log_file
 
 # Display the log file
