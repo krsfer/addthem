@@ -42,14 +42,22 @@ while (( count < $max )); do
     fi
   done
 
+  # Skip the current question if 's' is entered
+  if [[ $guess == "s" ]]; then
+    echo "Skipping current question."
+    continue
+  fi
+
+  if [[ $guess == "q" || -z $guess ]]; then
+    break
+  fi
+
+
   # Record the end time and calculate the elapsed time
   end_time=$(date +%s)
   elapsed_time=$((end_time - start_time))
   total_time=$((total_time + elapsed_time))
 
-  if [[ $guess == "q" || -z $guess ]]; then
-    break
-  fi
 
   # Calculate the sum of the numbers in the array
   sum=0
