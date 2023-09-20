@@ -6,13 +6,16 @@ max=10
 total_time=0
 log_file="log.txt"
 
-
 # Clear the log file if it exists
 : > $log_file
 
-while (( count < $max )); do
+# Add table header to the log file
+echo "+------------+---------------+---------+----------------+" >> $log_file
+echo "|  Question  |    Numbers    |  Guess  | Elapsed Time(s) |" >> $log_file
+echo "+------------+---------------+---------+----------------+" >> $log_file
 
-  echo Question $((count+1)) / $max
+while (( count < $max )); do
+  echo Question $((count + 1)) / $max
 
   # Generate a random length between 3 and 6
   length=$((RANDOM % 4 + 3))
@@ -20,12 +23,24 @@ while (( count < $max )); do
   # Generate a random sequence of numbers with that length
   nums=($(jot -r $length 1 9))
 
+  # Sort the nums array in ascending order
+  nums=($(printf "%s\n" "${nums[@]}" | sort -n))
+
   echo ${nums[@]}
 
   # Record the start time
   start_time=$(date +%s)
 
-  read -r guess
+  # Sanitize input
+  while true; do
+    read -r guess
+
+    if [[ -z $guess || $guess =~ ^[0-9a-z]+$ ]]; then
+      break
+    else
+      echo "Invalid input. Please enter only characters between 0-9 or a-z."
+    fi
+  done
 
   # Record the end time and calculate the elapsed time
   end_time=$(date +%s)
@@ -42,13 +57,14 @@ while (( count < $max )); do
     sum=$((sum + n))
   done
 
-  # Log the question and elapsed time to a file
-  echo "Question $((count+1)): Numbers=${nums[@]}, Guess=$guess, Elapsed Time=$elapsed_time sec" >> $log_file
+  # Log the question and elapsed time to a file, formatted as a table row
+  printf "| %10d | %13s | %7s | %14d |\n" $((count + 1)) "${nums[*]}" "$guess" "$elapsed_time" >> $log_file
+  echo "+------------+---------------+---------+----------------+" >> $log_file
 
   if [[ $guess -eq $sum ]]; then
-    echo "correct"
+    echo -e "\033[32;40mCorrect\033[0m"  # Green text on black background
   else
-    echo "The sum is $sum"
+    echo -e "\033[31;40mThe sum is $sum\033[0m"  # Red text on black background
   fi
 
   count=$((count + 1))

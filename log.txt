@@ -1,2 +1,0 @@
-Question 1: Numbers=4 2 3 1 9 7, Guess=26, Elapsed Time=21 sec
-Total time for the session: 23 sec
