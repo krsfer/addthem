@@ -93,3 +93,26 @@ echo "Total time for all sessions: $total_time sec" >> $log_file
 
 # Display the log file
 cat $log_file
+
+# Create a here document called notes
+cat << notes
+1. Use the read command to get user input.
+2. Use the date command to get the current date and time.
+3. Use the jot command to generate random numbers.
+4. Use the tr command to translate characters.
+5. Use the sort command to sort numbers.
+6. Use the printf command to format output.
+7. Use the awk command to process text files.
+8. Use the sed command to edit text files.
+notes
+
+cat << prompt
+Translate the following script to html and external javascript called "code.js", replacing q and s inputs with buttons
+Use local storage to read and write the log.
+Display the log in a table with a button to clear the log.
+Update the log when the user clicks on the button to clear the log.
+Update the log and table when the user presses enter or clicks on the submit button.
+Add a button to the html page to start a new session.
+Display the textbox below the table.
+Display all buttons at the bottom of the page.
+prompt
