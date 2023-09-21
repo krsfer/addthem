@@ -43,10 +43,11 @@ if [[ -f $log_file ]]; then
   mv temp_log.txt $log_file
 else
   {
-    echo "+------------+---------------+---------+-----------------+"
-    echo "|  Question  |    Numbers    |  Guess  | Elapsed Time(s) |"
-    echo "+------------+---------------+---------+-----------------+"
+    echo "+------------+---------------+---------+-----------------+---------------------+"
+    echo "|  Question  |    Numbers    |  Guess  | Elapsed Time(s) |        Date         |"
+    echo "+------------+---------------+---------+-----------------+---------------------+"
   } >> $log_file
+
 fi
 
 
@@ -72,8 +73,12 @@ while (( count < $max )); do
     sum=$((sum + n))
   done
 
-  printf "| %10d | %13s | %7s | %15d |\n" $((count + 1)) "${nums[*]}" "$guess" "$elapsed_time" >> $log_file
-  echo "+------------+---------------+---------+-----------------+" >> $log_file
+  # Get the current date and time
+  current_date=$(date +"%Y %m %d %H %M %S")
+
+  printf "| %10d | %13s | %7s | %15d | %19s |\n" $((count + 1)) "${nums[*]}" "$guess" "$elapsed_time" "$current_date" >> $log_file
+  echo "+------------+---------------+---------+-----------------+---------------------+" >> $log_file
+
 
   [[ $guess -eq $sum ]] && echo -e "\033[32;40mCorrect\033[0m" || echo -e "\033[31;40mThe sum is $sum\033[0m"
 
